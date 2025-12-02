@@ -1,6 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport"
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jada Babysits</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Comic Sans MS", cursive;
+      background-color: #ffe4f0;
+      text-align: center;
+      color: #d14f8f;
+    }
+
+    header {
+      padding: 20px;
+    }
+
+    img.logo {
+      width: 180px;
+      margin-bottom: 10px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      background: white;
+      border: 2px solid #ff9ac9;
+      padding: 10px 15px;
+      border-radius: 12px;
+      font-weight: bold;
+      color: #d14f8f;
+      cursor: pointer;
+    }
+
+    nav button:hover {
+      background: #ffd2e9;
+    }
+
+    .card {
+      background: white;
+      width: 90%;
+      max-width: 400px;
+      margin: 10px auto;
+      padding: 20px;
+      border-radius: 20px;
+      border: 2px solid #ff9ac9;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <!-- ⭐ YOUR LOGO HERE ⭐ -->
+    <img class="logo" src="https://raw.githubusercontent.com/YOUR-USERNAME/YOUR-REPO-NAME/main/logo.png" alt="Jada Babysits Logo">
+    <h1>✨ Jada Babysits ✨</h1>
+  </header>
+
+  <!-- NAVIGATION BUTTONS -->
+  <nav>
+    <button onclick="showPage('home')">🏠 Home</button>
+    <button onclick="showPage('services')">🌟 Services</button>
+    <button onclick="showPage('about')">💖 About Me</button>
+    <button onclick="showPage('rates')">💵 Rates</button>
+    <button onclick="showPage('contact')">📞 Contact</button>
+  </nav>
+
+  <!-- HOME PAGE -->
+  <div id="home" class="card">
+    <h2>Welcome!</h2>
+    <p>Hi! I'm Jada — your fun, caring, and super-responsible babysitter! 🧸💗</p>
+  </div>
+
+  <!-- SERVICES PAGE -->
+  <div id="services" class="card" style="display:none;">
+    <h2>My Services</h2>
+    <ul style="text-align:left; max-width:250px; margin:auto;">
+      <li>🧸 Fun & Safe Playtime</li>
+      <li>🎨 Crafts & Coloring</li>
+      <li>📚 Homework Help</li>
+      <li>🍎 Snack Prep</li>
+      <li>😴 Bedtime Routine</li>
+    </ul>
+  </div>
+
+  <!-- ABOUT PAGE -->
+  <div id="about" class="card" style="display:none;">
+    <h2>About Me</h2>
+    <p>I'm Jada! I love helping kids have fun and stay safe. 💕</p>
+  </div>
+
+  <!-- RATES PAGE -->
+  <div id="rates" class="card" style="display:none;">
+    <h2>My Rates</h2>
+    <ul style="text-align:left; max-width:250px; margin:auto;">
+      <li>✨ After School – $10/hr</li>
+      <li>🌙 Evenings – $12/hr</li>
 
