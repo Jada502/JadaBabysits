@@ -1,111 +1,179 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jada Babysits</title>
+// Updated Babysitting App with Accounts, Booking System, Calendar, and Punch Card
+// Paste this entire file into your index.js or App.js
 
-  <style>
-    body {
-      margin: 0;
-      font-family: "Comic Sans MS", cursive;
-      background-color: #ffe4f0;
-      text-align: center;
-      color: #d14f8f;
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export default function BabysittingApp() {
+  const [page, setPage] = useState("home");
+
+  // ACCOUNT SYSTEM (simple local login)
+  const [user, setUser] = useState(null);
+  const [accounts, setAccounts] = useState([]);
+
+  const handleSignup = () => {
+    const name = prompt("Parent name:");
+    const password = prompt("Create password:");
+    if (name && password) {
+      setAccounts((prev) => [...prev, { name, password }]);
+      alert("Account created!");
     }
+  };
 
-    header {
-      padding: 20px;
+  const handleLogin = () => {
+    const name = prompt("Name:");
+    const password = prompt("Password:");
+    const found = accounts.find(
+      (acc) => acc.name === name && acc.password === password
+    );
+    if (found) {
+      setUser(found);
+      alert("Welcome back!");
+    } else {
+      alert("Account not found.");
     }
+  };
 
-    img.logo {
-      width: 180px;
-      margin-bottom: 10px;
+  // BOOKING SYSTEM
+  const [bookings, setBookings] = useState([]);
+
+  const addBooking = () => {
+    if (!user) return alert("Please log in first 💖");
+    const date = prompt("Date (YYYY-MM-DD):");
+    const time = prompt("Time:");
+    if (date && time) {
+      setBookings((prev) => [...prev, { parent: user.name, date, time }]);
+      alert("Booking added!");
     }
+  };
 
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
+  // PUNCH CARD
+  const punches = bookings.length;
+  const punchesLeft = 10 - (punches % 10);
 
-    nav button {
-      background: white;
-      border: 2px solid #ff9ac9;
-      padding: 10px 15px;
-      border-radius: 12px;
-      font-weight: bold;
-      color: #d14f8f;
-      cursor: pointer;
-    }
+  // SIMPLE CALENDAR (auto‑lists booked dates)
+  const uniqueDates = [...new Set(bookings.map((b) => b.date))];
 
-    nav button:hover {
-      background: #ffd2e9;
-    }
+  return (
+    <>
+      {/* NAVIGATION */}
+      <div className="w-full max-w-md flex justify-around p-3 bg-white shadow rounded-2xl mb-4 border-2 border-pink-300">
+        <button onClick={() => setPage("home")} className="text-pink-600 font-bold">🏠 Home</button>
+        <button onClick={() => setPage("bookings")} className="text-pink-600 font-bold">📒 Bookings</button>
+        <button onClick={() => setPage("calendar")} className="text-pink-600 font-bold">📅 Calendar</button>
+        <button onClick={() => setPage("punch")} className="text-pink-600 font-bold">🎟 Punch Card</button>
+        <button onClick={() => setPage("account")} className="text-pink-600 font-bold">👤 Account</button>
+      </div>
 
-    .card {
-      background: white;
-      width: 90%;
-      max-width: 400px;
-      margin: 10px auto;
-      padding: 20px;
-      border-radius: 20px;
-      border: 2px solid #ff9ac9;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+      {/* HOME */}
+      {page === "home" && (
+        <div className="min-h-screen p-6 bg-pink-100 flex flex-col items-center gap-6">
+          <h1 className="text-4xl font-bold text-pink-600">✨🐰 Jada's Babysitting App 🦋✨</h1>
 
-    h2 {
-      margin-bottom: 10px;
-    }
-  </style>
-</head>
-<body>
+          <Card className="w-full max-w-md shadow-xl rounded-2xl border-2 border-pink-300 bg-white">
+            <CardContent className="p-6 bg-pink-50 rounded-2xl">
+              <h2 className="text-xl font-semibold text-pink-600">🌸 Welcome!</h2>
+              <p className="text-pink-700">Log in to start booking babysitting days 💖</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-  <header>
-    <!-- ⭐ YOUR LOGO HERE ⭐ -->
-    <img class="logo" src="https://raw.githubusercontent.com/YOUR-USERNAME/YOUR-REPO-NAME/main/logo.png" alt="Jada Babysits Logo">
-    <h1>✨ Jada Babysits ✨</h1>
-  </header>
+      {/* ACCOUNT PAGE */}
+      {page === "account" && (
+        <div className="min-h-screen p-6 bg-pink-100 flex flex-col items-center gap-6">
+          <Card className="w-full max-w-md shadow-xl rounded-2xl border-2 border-pink-300 bg-white">
+            <CardContent className="p-6 bg-pink-50 rounded-2xl flex flex-col gap-4">
+              <h2 className="text-xl font-semibold text-pink-600">👤 Account</h2>
 
-  <!-- NAVIGATION BUTTONS -->
-  <nav>
-    <button onclick="showPage('home')">🏠 Home</button>
-    <button onclick="showPage('services')">🌟 Services</button>
-    <button onclick="showPage('about')">💖 About Me</button>
-    <button onclick="showPage('rates')">💵 Rates</button>
-    <button onclick="showPage('contact')">📞 Contact</button>
-  </nav>
+              {user ? (
+                <p className="text-pink-700">Logged in as <strong>{user.name}</strong></p>
+              ) : (
+                <p className="text-pink-700">Not logged in 💕</p>
+              )}
 
-  <!-- HOME PAGE -->
-  <div id="home" class="card">
-    <h2>Welcome!</h2>
-    <p>Hi! I'm Jada — your fun, caring, and super-responsible babysitter! 🧸💗</p>
-  </div>
+              <Button onClick={handleSignup} className="bg-pink-400 text-white rounded-xl p-2">🌈 Sign Up</Button>
+              <Button onClick={handleLogin} className="bg-pink-400 text-white rounded-xl p-2">💖 Log In</Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-  <!-- SERVICES PAGE -->
-  <div id="services" class="card" style="display:none;">
-    <h2>My Services</h2>
-    <ul style="text-align:left; max-width:250px; margin:auto;">
-      <li>🧸 Fun & Safe Playtime</li>
-      <li>🎨 Crafts & Coloring</li>
-      <li>📚 Homework Help</li>
-      <li>🍎 Snack Prep</li>
-      <li>😴 Bedtime Routine</li>
-    </ul>
-  </div>
+      {/* BOOKINGS */}
+      {page === "bookings" && (
+        <div className="min-h-screen p-6 bg-pink-100 flex flex-col items-center gap-6">
+          <Card className="w-full max-w-md shadow-xl rounded-2xl border-2 border-pink-300 bg-white">
+            <CardContent className="p-6 bg-pink-50 rounded-2xl">
+              <h2 className="text-xl font-semibold text-pink-600">📒 Bookings</h2>
 
-  <!-- ABOUT PAGE -->
-  <div id="about" class="card" style="display:none;">
-    <h2>About Me</h2>
-    <p>I'm Jada! I love helping kids have fun and stay safe. 💕</p>
-  </div>
+              <Button onClick={addBooking} className="mt-3 bg-pink-400 text-white rounded-xl p-2">➕ Add Booking</Button>
 
-  <!-- RATES PAGE -->
-  <div id="rates" class="card" style="display:none;">
-    <h2>My Rates</h2>
-    <ul style="text-align:left; max-width:250px; margin:auto;">
-      <li>✨ After School – $10/hr</li>
-      <li>🌙 Evenings – $12/hr</li>
+              {bookings.length === 0 ? (
+                <p className="text-gray-500 mt-4">No bookings yet 💗</p>
+              ) : (
+                <ul className="space-y-3 mt-4">
+                  {bookings.map((b, i) => (
+                    <li key={i} className="p-3 bg-white rounded-xl shadow border border-pink-200">
+                      <p className="text-pink-600 text-lg">🌸 Parent: {b.parent}</p>
+                      <p className="text-pink-500">📅 {b.date}</p>
+                      <p className="text-pink-500">⏰ {b.time}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
+      {/* CALENDAR */}
+      {page === "calendar" && (
+        <div className="min-h-screen p-6 bg-pink-100 flex flex-col items-center gap-6">
+          <Card className="w-full max-w-md shadow-xl rounded-2xl border-2 border-pink-300 bg-white">
+            <CardContent className="p-6 bg-pink-50 rounded-2xl">
+              <h2 className="text-xl font-semibold text-pink-600">📅 Calendar</h2>
+
+              {uniqueDates.length === 0 ? (
+                <p className="text-gray-500">No dates booked yet 💖</p>
+              ) : (
+                <ul className="space-y-3 mt-4">
+                  {uniqueDates.map((d, i) => (
+                    <li key={i} className="p-3 bg-white rounded-xl shadow border border-pink-200 text-pink-600 font-semibold">
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* PUNCH CARD */}
+      {page === "punch" && (
+        <div className="min-h-screen p-6 bg-pink-100 flex flex-col items-center gap-6">
+          <Card className="w-full max-w-md shadow-xl rounded-2xl border-2 border-pink-300 bg-white">
+            <CardContent className="p-6 bg-pink-50 rounded-2xl flex flex-col gap-4">
+              <h2 className="text-xl font-semibold text-pink-600">🎟 Punch Card</h2>
+
+              <p className="text-pink-700">Bookings so far: <strong>{punches}</strong></p>
+              <p className="text-pink-700">Punches until reward: <strong>{punchesLeft}</strong></p>
+
+              <div className="grid grid-cols-5 gap-2 mt-4">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-10 h-10 rounded-xl border-2 ${
+                      i < punches % 10 ? "bg-pink-400 border-pink-500" : "bg-white border-pink-200"
+                    }`}
+                  ></div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </>
+  );
+}
