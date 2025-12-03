@@ -39,6 +39,8 @@
     .top-row{display:flex;gap:12px;align-items:center;justify-content:space-between}
     footer{margin-top:24px;text-align:center;color:var(--muted);font-size:0.85rem}
     .small-link{background:none;border:none;color:var(--pink);text-decoration:underline;cursor:pointer;padding:0}
+    .delete-btn{background:#ff6b6b;color:white;border:none;padding:6px 8px;border-radius:10px;cursor:pointer}
+    .staff-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
     @media(max-width:520px){
       .two{grid-template-columns:1fr}
       img.logo{width:96px}
@@ -178,25 +180,42 @@
 
   <script>
     // --- localStorage keys ---
-    const LS_ACCOUNTS = 'jada_accounts_v2';
-    const LS_USER = 'jada_user_v2';
-    const LS_BOOKINGS = 'jada_bookings_v2';
+    const LS_ACCOUNTS = 'jada_accounts_v3';
+    const LS_USER = 'jada_user_v3';
+    const LS_BOOKINGS = 'jada_bookings_v3';
+    const LS_PUNCH = 'jada_punches_v1';
+
+    // secret staff code (babysitter/staff must enter this at signup to become staff)
+    const STAFF_CODE = 'BBS-9274';
 
     // --- helpers to read/write localStorage ---
     function save(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
     function load(k){ try{ return JSON.parse(localStorage.getItem(k)) || null }catch(e){return null} }
 
-    // state
+    // initial state
     let accounts = load(LS_ACCOUNTS) || [];
     let user = load(LS_USER) || null;
     let bookings = load(LS_BOOKINGS) || [];
+    let punches = load(LS_PUNCH) || {}; // { parentName: number }
+
+    // seed a sample staff account (Jada) if no accounts exist
+    if(accounts.length === 0){
+      accounts.push({ name: 'Jada', pass: 'jada123', isParent: false, isStaff: true });
+      // place-holder example friends - you can create real staff via sign-up+code too
+      accounts.push({ name: 'Friend1', pass: 'f1pass', isParent: false, isStaff: true });
+      accounts.push({ name: 'Friend2', pass: 'f2pass', isParent: false, isStaff: true });
+      save(LS_ACCOUNTS, accounts);
+    }
 
     // navigation helper
     function navTo(id){
       const sections = ['home','booking','calendar','punch','about','rates','contact','account','parents'];
       sections.forEach(s => document.getElementById(s).style.display = (s===id ? 'block' : 'none'));
       // update active nav style
-      sections.forEach(s => document.getElementById('nav-'+s).classList && document.getElementById('nav-'+s).classList.remove('active'));
+      sections.forEach(s => {
+        const el = document.getElementById('nav-'+s);
+        if(el && el.classList) el.classList.remove('active');
+      });
       const activeEl = document.getElementById('nav-'+id);
       if(activeEl) activeEl.classList.add('active');
       // render dynamic content
@@ -211,29 +230,43 @@
     // update total bookings shown on home
     function updateTotals(){ document.getElementById('totalBookings').innerText = bookings.length; }
 
-    // account UI
+    // ------------ ACCOUNT UI & AUTH ------------
     function renderAccount(){
       const ai = document.getElementById('accountInfo');
       const af = document.getElementById('authForms');
       af.innerHTML = '';
-      if(user){ ai.innerHTML = `<div class="muted">Logged in as <strong>${escapeHtml(user.name)}</strong> ${user.isParent ? '👨‍👩‍👧' : ''}</div>`; 
-                  document.getElementById('bf_parent').value = user.name; }
-      else ai.innerHTML = `<div class="muted">Not logged in</div>`;
+      if(user){
+        ai.innerHTML = `<div class="muted">Logged in as <strong>${escapeHtml(user.name)}</strong> ${user.isParent ? '👨‍👩‍👧' : ''}${user.isStaff ? ' 🛡️ Staff' : ''}</div>`;
+        document.getElementById('bf_parent').value = user.name;
+      } else {
+        ai.innerHTML = `<div class="muted">Not logged in</div>`;
+      }
     }
 
     function showSignup(){
       const af = document.getElementById('authForms');
       af.innerHTML = `
         <div style="margin-top:8px">
-          <label>Parent name</label>
+          <label>Account name</label>
           <input id="su_name" placeholder="Your name" />
           <label style="margin-top:8px">Create password</label>
           <input id="su_pass" type="password" placeholder="Password" />
           <label style="margin-top:8px"><input id="su_isparent" type="checkbox" /> I'm a parent</label>
+          <label style="margin-top:8px"><input id="su_isstaff" type="checkbox" /> I'm staff (requires code)</label>
+          <div id="su_staff_code_wrap" style="display:none;margin-top:8px">
+            <label>Staff code</label>
+            <input id="su_staff_code" placeholder="Enter staff code" />
+          </div>
           <div style="margin-top:8px"><button class="btn" onclick="signup()">Create Account</button></div>
         </div>
       `;
+      // show staff code input when checkbox toggled
+      const cb = document.getElementById('su_isstaff');
+      cb.addEventListener('change', ()=> {
+        document.getElementById('su_staff_code_wrap').style.display = cb.checked ? 'block' : 'none';
+      });
     }
+
     function showLogin(){
       const af = document.getElementById('authForms');
       af.innerHTML = `
@@ -248,14 +281,24 @@
     }
 
     function signup(){
-      const n = (document.getElementById('su_name')||{}).value || '';
+      const n = (document.getElementById('su_name')||{}).value.trim() || '';
       const p = (document.getElementById('su_pass')||{}).value || '';
       const isParent = !!(document.getElementById('su_isparent')||{}).checked;
+      const wantsStaff = !!(document.getElementById('su_isstaff')||{}).checked;
+      const staffCode = (document.getElementById('su_staff_code')||{}).value || '';
       if(!n || !p){ alert('Please enter name & password'); return; }
       if(accounts.find(a=>a.name===n)){ alert('That name already exists. Choose another.'); return; }
-      const a = { name:n, pass:p, isParent: !!isParent };
+      let isStaff = false;
+      if(wantsStaff){
+        if(staffCode === STAFF_CODE){
+          isStaff = true;
+        } else {
+          alert('Invalid staff code. You will not be registered as staff.');
+        }
+      }
+      const a = { name:n, pass:p, isParent: !!isParent, isStaff: !!isStaff };
       accounts.push(a); save(LS_ACCOUNTS, accounts);
-      user = { name:n, isParent: !!isParent }; save(LS_USER, user);
+      user = { name:n, isParent: !!isParent, isStaff: !!isStaff }; save(LS_USER, user);
       renderAccount(); alert('Account created & logged in! 😊'); navTo('home');
     }
 
@@ -264,13 +307,13 @@
       const p = (document.getElementById('li_pass')||{}).value || '';
       const f = accounts.find(a=>a.name===n && a.pass===p);
       if(!f){ alert('Login failed. Check name/password.'); return; }
-      user = { name:f.name, isParent: !!f.isParent }; save(LS_USER, user);
+      user = { name:f.name, isParent: !!f.isParent, isStaff: !!f.isStaff }; save(LS_USER, user);
       renderAccount(); alert('Welcome back! 💖'); navTo('home');
     }
 
     function logout(){ user = null; save(LS_USER, null); renderAccount(); alert('Logged out'); navTo('home'); }
 
-    // bookings
+    // ------------ BOOKINGS ------------
     function submitBooking(){
       if(!user || !user.isParent){ alert('Please sign up or log in as a parent to book.'); navTo('account'); return; }
       const parent = (document.getElementById('bf_parent')||{}).value.trim();
@@ -279,28 +322,57 @@
       const time = (document.getElementById('bf_time')||{}).value;
       const notes = (document.getElementById('bf_notes')||{}).value.trim();
       if(!parent || !child || !date || !time){ alert('Please fill name, child, date and time'); return; }
-      bookings.push({ parent, child, date, time, notes, by:user.name, created: new Date().toISOString() });
+      const newBooking = { parent, child, date, time, notes, by:user.name, created: new Date().toISOString() };
+      bookings.push(newBooking);
       save(LS_BOOKINGS, bookings);
+      // increment punch for this parent
+      punches[parent] = (punches[parent] || 0) + 1;
+      save(LS_PUNCH, punches);
       renderBookingList(); renderCalendar(); renderPunch(); updateTotals();
       alert('Booking submitted! (Saved to your browser.)');
       // clear inputs
       (document.getElementById('bf_child')||{}).value=''; (document.getElementById('bf_date')||{}).value=''; (document.getElementById('bf_time')||{}).value=''; (document.getElementById('bf_notes')||{}).value='';
     }
 
+    function deleteBooking(index){
+      if(!user || !user.isStaff){ alert('Only staff can delete bookings.'); return; }
+      // remove booking and adjust punch
+      const removed = bookings.splice(index,1)[0];
+      if(removed && removed.parent){
+        punches[removed.parent] = Math.max(0, (punches[removed.parent]||0) - 1);
+        save(LS_PUNCH, punches);
+      }
+      save(LS_BOOKINGS, bookings);
+      renderBookingList(); renderCalendar(); renderPunch(); updateTotals();
+      alert('Booking deleted.');
+    }
+
     function renderBookingList(){
       const el = document.getElementById('bookingList'); el.innerHTML = '';
-      const mine = bookings.filter(b => !user || b.by === user.name);
-      if(mine.length===0){ el.innerHTML = '<div class="muted">No bookings yet</div>'; return; }
-      mine.forEach(b=>{
+      // show all bookings to staff, otherwise only user's bookings
+      const list = (user && user.isStaff) ? bookings : bookings.filter(b => !user || b.by === user.name);
+      if(list.length===0){ el.innerHTML = '<div class="muted">No bookings yet</div>'; return; }
+      list.forEach((b, idx) => {
         const d = document.createElement('div'); d.className='booking-item';
+        // when showing filtered list (non-staff) idx won't equal bookings index; we need original index for delete
+        const originalIndex = bookings.indexOf(b);
         d.innerHTML = `<div style="font-weight:700">${escapeHtml(b.child)} — <span class="muted small">${escapeHtml(b.date)} ${escapeHtml(b.time)}</span></div>
                        <div class="muted">Parent: ${escapeHtml(b.parent)}</div>
                        <div style="margin-top:6px;font-size:0.9rem">${escapeHtml(b.notes||'')}</div>`;
+        if(user && user.isStaff){
+          const btn = document.createElement('button');
+          btn.className = 'delete-btn';
+          btn.innerText = 'Delete';
+          btn.onclick = () => {
+            if(confirm('Delete this booking?')) deleteBooking(originalIndex);
+          };
+          d.appendChild(btn);
+        }
         el.appendChild(d);
       });
     }
 
-    // calendar
+    // ------------ CALENDAR ------------
     function renderCalendar(){
       const el = document.getElementById('calendarList'); el.innerHTML = '';
       const dates = [...new Set(bookings.map(b=>b.date))].sort();
@@ -313,29 +385,89 @@
       });
     }
 
-    // punch card
+    // ------------ PUNCH CARD ------------
     function renderPunch(){
       const grid = document.getElementById('punchGrid'); grid.innerHTML = '';
-      const count = user ? bookings.filter(b=>b.by===user.name).length : bookings.length;
+      // show global count for logged-in user (their punches) or total if staff
+      const count = (user && !user.isStaff) ? (punches[user.name] || 0) : Object.values(punches).reduce((a,b)=>a+b,0);
       document.getElementById('punchCount').innerText = count;
-      const filled = count % 10;
-      for(let i=0;i<10;i++){
-        const box = document.createElement('div'); box.className='punch' + (i<filled ? ' filled' : '');
-        box.innerHTML = i<filled ? '❤' : '♡';
-        grid.appendChild(box);
+      const filled = (user && !user.isStaff) ? (punches[user.name] || 0) % 10 : 0;
+      // if user is staff show aggregated or per-parent cards instead below
+      if(user && user.isStaff){
+        // staff sees per-parent mini cards below the main area
+        document.getElementById('punchNote').innerText = 'You can manage punches for each parent below.';
+      } else {
+        for(let i=0;i<10;i++){
+          const box = document.createElement('div'); box.className='punch' + (i<filled ? ' filled' : '');
+          box.innerHTML = i<filled ? '❤' : '♡';
+          grid.appendChild(box);
+        }
+        const note = document.getElementById('punchNote');
+        if(filled===0) note.innerText = 'Start earning punches by booking sessions!';
+        else if(filled<10) note.innerText = `${10-filled} punches until a reward 🎁`;
+        else note.innerText = 'You earned a reward! Claim with Jada 💖';
       }
-      const note = document.getElementById('punchNote');
-      if(filled===0) note.innerText = 'Start earning punches by booking sessions!';
-      else if(filled<10) note.innerText = `${10-filled} punches until a reward 🎁`;
-      else note.innerText = 'You earned a reward! Claim with Jada 💖';
+      // if staff show per-parent punch cards under a section in the parents page (renderParents handles it)
     }
 
-    // parents-only page
+    // ------------ PARENTS-ONLY PAGE ------------
     function renderParents(){
       const el = document.getElementById('parentsContent'); el.innerHTML = '';
-      if(!user || !user.isParent){ el.innerHTML = '<div class="muted">This page is for parents only. Please sign up and check the "I am a parent" box.</div>'; return; }
-      // show all bookings (parents can see only their bookings or all? we'll show their own and a CSV export button)
-      const my = bookings.filter(b=>b.parent===user.name || b.by===user.name);
+      if(!user || !user.isParent){
+        // if staff, allow staff view
+        if(user && user.isStaff){
+          const h = document.createElement('div'); h.innerHTML = `<div style="font-weight:700">Staff dashboard — All parents & punches</div>`;
+          el.appendChild(h);
+        } else {
+          el.innerHTML = '<div class="muted">This page is for parents only. Please sign up and check the "I am a parent" box.</div>';
+          return;
+        }
+      }
+
+      // If staff: show all parents and controls
+      if(user && user.isStaff){
+        const parents = Array.from(new Set(bookings.map(b => b.parent).concat(Object.keys(punches))));
+        if(parents.length === 0) {
+          const p = document.createElement('div'); p.className='muted'; p.innerText = 'No parent data yet'; el.appendChild(p);
+        } else {
+          parents.forEach(parent => {
+            const wrap = document.createElement('div'); wrap.className='booking-item';
+            const count = punches[parent] || 0;
+            wrap.innerHTML = `<div style="font-weight:700">${escapeHtml(parent)}</div>
+                              <div class="muted">Punches: <strong>${count}</strong></div>`;
+            // staff controls: add punch / reset
+            const controls = document.createElement('div'); controls.className='staff-controls';
+            const add = document.createElement('button'); add.className='btn'; add.innerText = '+ Punch';
+            add.onclick = ()=> { punches[parent] = (punches[parent]||0)+1; save(LS_PUNCH,punches); renderParents(); renderPunch(); };
+            const reset = document.createElement('button'); reset.className='btn'; reset.innerText='Reset';
+            reset.onclick = ()=> { if(confirm('Reset punches for '+parent+'?')){ punches[parent]=0; save(LS_PUNCH,punches); renderParents(); renderPunch(); } };
+            controls.appendChild(add); controls.appendChild(reset);
+            wrap.appendChild(controls);
+            // list parent's bookings
+            const parentBookings = bookings.filter(b=>b.parent===parent);
+            if(parentBookings.length>0){
+              const sub = document.createElement('div'); sub.style.marginTop='8px';
+              parentBookings.forEach(pb => {
+                const item = document.createElement('div'); item.className='booking-item';
+                item.innerHTML = `<div style="font-weight:700">${escapeHtml(pb.child)} — <span class="muted small">${escapeHtml(pb.date)} ${escapeHtml(pb.time)}</span></div>
+                                  <div class="muted">Notes: ${escapeHtml(pb.notes||'')}</div>`;
+                sub.appendChild(item);
+              });
+              wrap.appendChild(sub);
+            }
+            el.appendChild(wrap);
+          });
+        }
+        // staff export all bookings button
+        const btn = document.createElement('button'); btn.className='btn'; btn.style.marginTop='10px';
+        btn.innerText = 'Export all bookings (CSV)';
+        btn.onclick = ()=>{ downloadCSV(bookings); };
+        el.appendChild(btn);
+        return;
+      }
+
+      // For parent users: show their data only
+      const my = bookings.filter(b => b.parent === user.name);
       const header = document.createElement('div'); header.innerHTML = `<div style="font-weight:700">Bookings for ${escapeHtml(user.name)}</div>`;
       el.appendChild(header);
       if(my.length===0){ const p=document.createElement('div'); p.className='muted'; p.innerText='No bookings yet'; el.appendChild(p); }
@@ -343,15 +475,20 @@
         my.forEach(b=>{
           const d = document.createElement('div'); d.className='booking-item';
           d.innerHTML = `<div style="font-weight:700">${escapeHtml(b.child)} — <span class="muted small">${escapeHtml(b.date)} ${escapeHtml(b.time)}</span></div>
-                         <div class="muted">Parent: ${escapeHtml(b.parent)}</div>
-                         <div style="margin-top:6px;font-size:0.9rem">${escapeHtml(b.notes||'')}</div>`;
+                         <div class="muted">Notes: ${escapeHtml(b.notes||'')}</div>`;
           el.appendChild(d);
         });
-        const btn = document.createElement('button'); btn.className='btn';
-        btn.innerText = 'Export my bookings (CSV)';
+        const btn = document.createElement('button'); btn.className='btn'; btn.innerText = 'Export my bookings (CSV)';
         btn.onclick = ()=>{ downloadCSV(my); };
         el.appendChild(btn);
       }
+
+      // show this parent's punch card
+      const pc = document.createElement('div'); pc.style.marginTop='12px';
+      const pcount = punches[user.name] || 0;
+      pc.innerHTML = `<div style="font-weight:700">Your Punches: ${pcount}</div>
+                      <div class="note">Collect 10 punches for a reward!</div>`;
+      el.appendChild(pc);
     }
 
     // helper to download CSV
@@ -373,6 +510,8 @@
       document.getElementById('bf_parent').value = user && user.name ? user.name : '';
       renderAccount(); renderBookingList(); renderCalendar(); renderPunch(); updateTotals();
       navTo('home');
+      // ensure punches object saved
+      save(LS_PUNCH, punches);
     })();
 
     // make some functions global for onClick inline handlers
@@ -383,6 +522,7 @@
     window.login = login;
     window.logout = logout;
     window.submitBooking = submitBooking;
+    window.deleteBooking = deleteBooking;
   </script>
 </body>
 </html>
