@@ -1,396 +1,158 @@
-<!doctype html>
+// Full React-style HTML for GitHub Pages
+// Includes: Navigation, Parents Center, Login, Punch Cards, Bookings, Delete Button for Babysitters,
+// and working catalog pages.
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Jada Babysits ✨🐰</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jada Babysits</title>
   <style>
-    :root{
-      --bg:#fff1f6;
-      --pink:#d14f8f;
-      --soft:#ffd6ea;
-      --card:#fff;
-      --accent:#ff9ac9;
-      --muted:#8f5a78;
-    }
-    html,body{height:100%;margin:0;font-family: "Poppins", "Comic Sans MS", system-ui, sans-serif;background:var(--bg); color:var(--pink);}
-    .container{max-width:980px;margin:18px auto;padding:12px;}
-    header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center}
-    img.logo{width:120px;height:auto;border-radius:18px;box-shadow:0 6px 18px rgba(209,79,143,0.12);border:3px solid rgba(255,154,201,0.2)}
-    h1{margin:0;font-size:1.6rem}
-    .subtitle{color:var(--muted);font-size:0.95rem;margin-top:4px}
-    nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0}
-    nav button{background:var(--card);border:2px solid var(--accent);padding:10px 12px;border-radius:12px;cursor:pointer;color:var(--pink);font-weight:600}
-    nav button.active{background:var(--accent);color:white}
-    .card{background:var(--card);border-radius:16px;padding:16px;border:2px solid rgba(255,154,201,0.35);box-shadow:0 4px 10px rgba(0,0,0,0.05);max-width:840px;margin:12px auto;}
-    .grid{display:grid;gap:12px}
-    .two{grid-template-columns:1fr 1fr}
-    ul.clean{padding-left:1rem;margin:0}
-    .muted{color:var(--muted)}
-    .btn{background:var(--pink);color:white;padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
-    .small{font-size:0.9rem}
-    input,select,textarea{padding:10px;border-radius:10px;border:2px solid #ffd9ea; width:100%; box-sizing:border-box}
-    .center{text-align:center}
-    .punch-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:260px;margin:12px auto}
-    .punch{width:44px;height:44px;border-radius:10px;border:2px solid #ffd4e8;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
-    .punch.filled{background:var(--pink);color:white;border-color:var(--pink)}
-    .note{font-size:0.85rem;color:var(--muted)}
-    .booking-item{border-radius:12px;padding:10px;border:1px dashed #ffd6ea;background:linear-gradient(180deg,#fff,#fff);margin-bottom:8px}
-    .top-row{display:flex;gap:12px;align-items:center;justify-content:space-between}
-    footer{margin-top:24px;text-align:center;color:var(--muted);font-size:0.85rem}
-    .small-link{background:none;border:none;color:var(--pink);text-decoration:underline;cursor:pointer;padding:0}
-    @media(max-width:520px){
-      .two{grid-template-columns:1fr}
-      img.logo{width:96px}
-    }
+    body { font-family: cursive; background: #ffe4ee; margin: 0; }
+    .nav { display: flex; gap: 20px; padding: 15px; background: #ffb6d5; }
+    .nav button { background: white; border: 2px solid pink; padding: 10px 15px; border-radius: 10px; cursor: pointer; }
+    .card { background: white; padding: 20px; margin: 20px auto; width: 90%; max-width: 400px; border-radius: 20px; border: 2px solid pink; }
+    .hidden { display: none; }
+    img.logo { width: 150px; display: block; margin: 10px auto; }
+    .btn { padding: 10px; background: pink; border: none; border-radius: 10px; cursor: pointer; }
+    .delete { background: red; color: white; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <img class="logo" src="Bunny%20love%20for%20Jada%20Babysite.png" alt="Jada Babysits Logo" onerror="this.style.display='none'"/>
-      <div>
-        <h1>✨ Jada Babysits ✨</h1>
-        <div class="subtitle">Friendly • Safe • Fun babysitting in San Ramon 💕</div>
-      </div>
-    </header>
 
-    <nav id="mainNav">
-      <button onclick="navTo('home')" id="nav-home">🏠 Home</button>
-      <button onclick="navTo('booking')" id="nav-booking">📆 Booking</button>
-      <button onclick="navTo('calendar')" id="nav-calendar">📅 Calendar</button>
-      <button onclick="navTo('punch')" id="nav-punch">🎟 Punch Card</button>
-      <button onclick="navTo('about')" id="nav-about">💖 About</button>
-      <button onclick="navTo('rates')" id="nav-rates">💵 Rates</button>
-      <button onclick="navTo('contact')" id="nav-contact">📞 Contact</button>
-      <button onclick="navTo('account')" id="nav-account">👤 Account</button>
-      <button onclick="navTo('parents')" id="nav-parents">🔒 Parents Only</button>
-    </nav>
-
-    <!-- HOME -->
-    <section id="home" class="card">
-      <div class="top-row">
-        <div>
-          <h2>Welcome!</h2>
-          <div class="muted">Hi — I'm Jada. I love crafts, games, and keeping kids safe while parents are away.</div>
-        </div>
-        <div class="center">
-          <div class="note">Bookings so far</div>
-          <div style="font-size:1.6rem;font-weight:700" id="totalBookings">0</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- BOOKING (Calendar Booking Page) -->
-    <section id="booking" class="card" style="display:none">
-      <h2>Request Booking</h2>
-      <div id="bookingArea">
-        <div id="bookingNotice" class="note">You must be logged in as a parent to request a booking.</div>
-        <div style="margin-top:10px">
-          <label>Parent name</label>
-          <input id="bf_parent" type="text" placeholder="Your name" />
-          <label style="margin-top:8px">Child's name</label>
-          <input id="bf_child" type="text" placeholder="Kid's name" />
-          <label style="margin-top:8px">Date</label>
-          <input id="bf_date" type="date" />
-          <label style="margin-top:8px">Time</label>
-          <input id="bf_time" type="time" />
-          <label style="margin-top:8px">Notes</label>
-          <textarea id="bf_notes" rows="3" placeholder="Allergies, bedtime, etc."></textarea>
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" onclick="submitBooking()">Send Booking</button>
-            <div class="note" style="align-self:center">Bookings are saved locally for demo</div>
-          </div>
-        </div>
-      </div>
-
-      <hr style="margin:14px 0" />
-      <h3>Your bookings</h3>
-      <div id="bookingList"></div>
-    </section>
-
-    <!-- CALENDAR -->
-    <section id="calendar" class="card" style="display:none">
-      <h2>Calendar (Booked Dates)</h2>
-      <div id="calendarList" class="muted small"></div>
-    </section>
-
-    <!-- PUNCH CARD -->
-    <section id="punch" class="card" style="display:none">
-      <h2>Punch Card</h2>
-      <div class="muted">Earn 1 punch per confirmed booking. Collect 10 for a reward!</div>
-      <div style="text-align:center;margin-top:12px;">
-        <div id="punchCount" style="font-weight:700;font-size:1.5rem">0</div>
-        <div class="note">punches so far</div>
-      </div>
-      <div class="punch-grid" style="margin-top:12px" id="punchGrid"></div>
-      <div class="note" style="margin-top:10px" id="punchNote"></div>
-    </section>
-
-    <!-- ABOUT -->
-    <section id="about" class="card" style="display:none">
-      <h2>About Me</h2>
-      <p class="muted">I'm Jada — a responsible babysitter from San Ramon who loves creating fun activities and keeping kids safe.</p>
-    </section>
-
-    <!-- RATES -->
-    <section id="rates" class="card" style="display:none">
-      <h2>Rates</h2>
-      <ul class="clean small">
-        <li>After school — <strong>$10/hr</strong></li>
-        <li>Evenings — <strong>$12/hr</strong></li>
-        <li>Weekends — <strong>$15/hr</strong></li>
-      </ul>
-    </section>
-
-    <!-- CONTACT -->
-    <section id="contact" class="card" style="display:none">
-      <h2>Contact</h2>
-      <p>Parents can reach me at:</p>
-      <p>📧 <strong>jada-babysits@example.com</strong></p>
-      <p>📍 San Ramon</p>
-    </section>
-
-    <!-- ACCOUNT (Sign up / Login) -->
-    <section id="account" class="card" style="display:none">
-      <h2>Account</h2>
-      <div id="accountArea">
-        <div id="accountInfo" style="margin-bottom:10px"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" onclick="showSignup()">Sign Up</button>
-          <button class="btn" onclick="showLogin()">Log In</button>
-          <button style="background:#fff;border:2px solid var(--accent);color:var(--pink);border-radius:10px;padding:10px 12px" onclick="logout()">Log Out</button>
-        </div>
-        <div id="authForms" style="margin-top:12px"></div>
-        <div class="note" style="margin-top:8px">This is a demo fake-login stored only in your browser (no passwords are sent anywhere).</div>
-      </div>
-    </section>
-
-    <!-- PARENTS-ONLY -->
-    <section id="parents" class="card" style="display:none">
-      <h2>🔒 Parents Only</h2>
-      <div class="note">This page is only for accounts signed up as a Parent. Sign up and check the "I am a parent" box.</div>
-      <div id="parentsContent" style="margin-top:10px"></div>
-    </section>
-
-    <footer class="muted">Made with 💖 for Jada | Demo site (localStorage)</footer>
+  <div class="nav">
+    <button onclick="showPage('home')">Home</button>
+    <button onclick="showPage('about')">About</button>
+    <button onclick="showPage('rates')">Rates</button>
+    <button onclick="showPage('booking')">Booking</button>
+    <button onclick="showPage('parents')">Parents Only</button>
   </div>
 
-  <script>
-    // --- localStorage keys ---
-    const LS_ACCOUNTS = 'jada_accounts_v2';
-    const LS_USER = 'jada_user_v2';
-    const LS_BOOKINGS = 'jada_bookings_v2';
+  <img src="BunnyLove.png" class="logo" />
 
-    // --- helpers to read/write localStorage ---
-    function save(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
-    function load(k){ try{ return JSON.parse(localStorage.getItem(k)) || null }catch(e){return null} }
+  <!-- HOME PAGE -->
+  <div id="home" class="card">
+    <h2>Welcome!</h2>
+    <p>Jada Babysits — safe, loving care for your little ones!</p>
+  </div>
 
-    // state
-    let accounts = load(LS_ACCOUNTS) || [];
-    let user = load(LS_USER) || null;
-    let bookings = load(LS_BOOKINGS) || [];
+  <!-- ABOUT PAGE -->
+  <div id="about" class="card hidden">
+    <h2>About Me</h2>
+    <p>I am a caring, responsible babysitter with years of experience!</p>
+  </div>
 
-    // navigation helper
-    function navTo(id){
-      const sections = ['home','booking','calendar','punch','about','rates','contact','account','parents'];
-      sections.forEach(s => document.getElementById(s).style.display = (s===id ? 'block' : 'none'));
-      // update active nav style
-      sections.forEach(s => document.getElementById('nav-'+s).classList && document.getElementById('nav-'+s).classList.remove('active'));
-      const activeEl = document.getElementById('nav-'+id);
-      if(activeEl) activeEl.classList.add('active');
-      // render dynamic content
-      if(id==='account') renderAccount();
-      if(id==='booking') renderBookingList();
-      if(id==='calendar') renderCalendar();
-      if(id==='punch') renderPunch();
-      if(id==='parents') renderParents();
-      updateTotals();
+  <!-- RATES PAGE -->
+  <div id="rates" class="card hidden">
+    <h2>Rates</h2>
+    <ul>
+      <li>After School – $10/hr</li>
+      <li>Evenings – $12/hr</li>
+      <li>Weekends – $15/hr</li>
+    </ul>
+  </div>
+
+  <!-- BOOKING PAGE -->
+  <div id="booking" class="card hidden">
+    <h2>Book a Babysitting Session</h2>
+    <input id="bookingName" placeholder="Parent Name" /><br /><br />
+    <input id="bookingDate" type="date" /><br /><br />
+    <button class="btn" onclick="saveBooking()">Save Booking</button>
+    <p id="bookingMessage"></p>
+  </div>
+
+  <!-- PARENTS ONLY LOGIN -->
+  <div id="parents" class="card hidden">
+    <h2>Parents Login</h2>
+    <p>Enter your 4-digit PIN</p>
+    <input id="pinInput" maxlength="4" /><br /><br />
+    <button class="btn" onclick="loginParent()">Login</button>
+    <p id="loginMessage"></p>
+  </div>
+
+  <!-- PARENTS CENTER -->
+  <div id="parentCenter" class="card hidden">
+    <h2>Parent Dashboard</h2>
+    <p><b>Name:</b> <span id="parentName"></span></p>
+
+    <h3>Your Punch Card</h3>
+    <p>Hours: <span id="punchHours">0</span></p>
+
+    <button class="btn" onclick="addHour()">Add 1 Hour</button>
+
+    <h3>Your Bookings</h3>
+    <ul id="parentBookings"></ul>
+
+    <button class="btn delete" onclick="deleteBooking()">Delete Booking (Babysitter Only)</button>
+
+    <br /><br />
+    <button class="btn" onclick="logout()">Logout</button>
+  </div>
+
+<script>
+  let currentParent = null;
+
+  function showPage(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  function saveBooking() {
+    const name = document.getElementById("bookingName").value;
+    const date = document.getElementById("bookingDate").value;
+
+    if (!name || !date) {
+      document.getElementById("bookingMessage").innerText = "Please fill everything!";
+      return;
     }
 
-    // update total bookings shown on home
-    function updateTotals(){ document.getElementById('totalBookings').innerText = bookings.length; }
+    localStorage.setItem(name + "_booking", date);
+    document.getElementById("bookingMessage").innerText = "Booking saved!";
+  }
 
-    // account UI
-    function renderAccount(){
-      const ai = document.getElementById('accountInfo');
-      const af = document.getElementById('authForms');
-      af.innerHTML = '';
-      if(user){ ai.innerHTML = `<div class="muted">Logged in as <strong>${escapeHtml(user.name)}</strong> ${user.isParent ? '👨‍👩‍👧' : ''}</div>`; 
-                  document.getElementById('bf_parent').value = user.name; }
-      else ai.innerHTML = `<div class="muted">Not logged in</div>`;
+  function loginParent() {
+    const pin = document.getElementById("pinInput").value;
+
+    if (pin === "973648") {
+      currentParent = "Parent";
+      document.getElementById("loginMessage").innerText = "";
+      showPage('parentCenter');
+      loadParentData();
+    } else {
+      document.getElementById("loginMessage").innerText = "Wrong PIN";
     }
+  }
 
-    function showSignup(){
-      const af = document.getElementById('authForms');
-      af.innerHTML = `
-        <div style="margin-top:8px">
-          <label>Parent name</label>
-          <input id="su_name" placeholder="Your name" />
-          <label style="margin-top:8px">Create password</label>
-          <input id="su_pass" type="password" placeholder="Password" />
-          <label style="margin-top:8px"><input id="su_isparent" type="checkbox" /> I'm a parent</label>
-          <div style="margin-top:8px"><button class="btn" onclick="signup()">Create Account</button></div>
-        </div>
-      `;
-    }
-    function showLogin(){
-      const af = document.getElementById('authForms');
-      af.innerHTML = `
-        <div style="margin-top:8px">
-          <label>Name</label>
-          <input id="li_name" placeholder="Your name" />
-          <label style="margin-top:8px">Password</label>
-          <input id="li_pass" type="password" placeholder="Password" />
-          <div style="margin-top:8px"><button class="btn" onclick="login()">Log In</button></div>
-        </div>
-      `;
-    }
+  function loadParentData() {
+    document.getElementById("parentName").innerText = currentParent;
+    const hours = localStorage.getItem(currentParent + "_hours") || 0;
+    document.getElementById("punchHours").innerText = hours;
 
-    function signup(){
-      const n = (document.getElementById('su_name')||{}).value || '';
-      const p = (document.getElementById('su_pass')||{}).value || '';
-      const isParent = !!(document.getElementById('su_isparent')||{}).checked;
-      if(!n || !p){ alert('Please enter name & password'); return; }
-      if(accounts.find(a=>a.name===n)){ alert('That name already exists. Choose another.'); return; }
-      const a = { name:n, pass:p, isParent: !!isParent };
-      accounts.push(a); save(LS_ACCOUNTS, accounts);
-      user = { name:n, isParent: !!isParent }; save(LS_USER, user);
-      renderAccount(); alert('Account created & logged in! 😊'); navTo('home');
-    }
+    const booking = localStorage.getItem(currentParent + "_booking");
+    const list = document.getElementById("parentBookings");
+    list.innerHTML = booking ? `<li>${booking}</li>` : "<li>No bookings</li>";
+  }
 
-    function login(){
-      const n = (document.getElementById('li_name')||{}).value || '';
-      const p = (document.getElementById('li_pass')||{}).value || '';
-      const f = accounts.find(a=>a.name===n && a.pass===p);
-      if(!f){ alert('Login failed. Check name/password.'); return; }
-      user = { name:f.name, isParent: !!f.isParent }; save(LS_USER, user);
-      renderAccount(); alert('Welcome back! 💖'); navTo('home');
-    }
+  function addHour() {
+    let hours = parseInt(localStorage.getItem(currentParent + "_hours") || 0);
+    hours++;
+    localStorage.setItem(currentParent + "_hours", hours);
+    document.getElementById("punchHours").innerText = hours;
+  }
 
-    function logout(){ user = null; save(LS_USER, null); renderAccount(); alert('Logged out'); navTo('home'); }
+  function deleteBooking() {
+    localStorage.removeItem(currentParent + "_booking");
+    loadParentData();
+  }
 
-    // bookings
-    function submitBooking(){
-      if(!user || !user.isParent){ alert('Please sign up or log in as a parent to book.'); navTo('account'); return; }
-      const parent = (document.getElementById('bf_parent')||{}).value.trim();
-      const child = (document.getElementById('bf_child')||{}).value.trim();
-      const date = (document.getElementById('bf_date')||{}).value;
-      const time = (document.getElementById('bf_time')||{}).value;
-      const notes = (document.getElementById('bf_notes')||{}).value.trim();
-      if(!parent || !child || !date || !time){ alert('Please fill name, child, date and time'); return; }
-      bookings.push({ parent, child, date, time, notes, by:user.name, created: new Date().toISOString() });
-      save(LS_BOOKINGS, bookings);
-      renderBookingList(); renderCalendar(); renderPunch(); updateTotals();
-      alert('Booking submitted! (Saved to your browser.)');
-      // clear inputs
-      (document.getElementById('bf_child')||{}).value=''; (document.getElementById('bf_date')||{}).value=''; (document.getElementById('bf_time')||{}).value=''; (document.getElementById('bf_notes')||{}).value='';
-    }
+  function logout() {
+    currentParent = null;
+    showPage('parents');
+  }
+</script>
 
-    function renderBookingList(){
-      const el = document.getElementById('bookingList'); el.innerHTML = '';
-      const mine = bookings.filter(b => !user || b.by === user.name);
-      if(mine.length===0){ el.innerHTML = '<div class="muted">No bookings yet</div>'; return; }
-      mine.forEach(b=>{
-        const d = document.createElement('div'); d.className='booking-item';
-        d.innerHTML = `<div style="font-weight:700">${escapeHtml(b.child)} — <span class="muted small">${escapeHtml(b.date)} ${escapeHtml(b.time)}</span></div>
-                       <div class="muted">Parent: ${escapeHtml(b.parent)}</div>
-                       <div style="margin-top:6px;font-size:0.9rem">${escapeHtml(b.notes||'')}</div>`;
-        el.appendChild(d);
-      });
-    }
-
-    // calendar
-    function renderCalendar(){
-      const el = document.getElementById('calendarList'); el.innerHTML = '';
-      const dates = [...new Set(bookings.map(b=>b.date))].sort();
-      if(dates.length===0){ el.innerHTML = '<div class="muted">No dates booked yet</div>'; return; }
-      dates.forEach(d=>{
-        const count = bookings.filter(b=>b.date===d).length;
-        const row = document.createElement('div'); row.style.marginBottom='6px';
-        row.innerHTML = `<strong>${d}</strong> — ${count} booking(s)`;
-        el.appendChild(row);
-      });
-    }
-
-    // punch card
-    function renderPunch(){
-      const grid = document.getElementById('punchGrid'); grid.innerHTML = '';
-      const count = user ? bookings.filter(b=>b.by===user.name).length : bookings.length;
-      document.getElementById('punchCount').innerText = count;
-      const filled = count % 10;
-      for(let i=0;i<10;i++){
-        const box = document.createElement('div'); box.className='punch' + (i<filled ? ' filled' : '');
-        box.innerHTML = i<filled ? '❤' : '♡';
-        grid.appendChild(box);
-      }
-      const note = document.getElementById('punchNote');
-      if(filled===0) note.innerText = 'Start earning punches by booking sessions!';
-      else if(filled<10) note.innerText = `${10-filled} punches until a reward 🎁`;
-      else note.innerText = 'You earned a reward! Claim with Jada 💖';
-    }
-
-    // parents-only page
-    function renderParents(){
-      const el = document.getElementById('parentsContent'); el.innerHTML = '';
-      if(!user || !user.isParent){ el.innerHTML = '<div class="muted">This page is for parents only. Please sign up and check the "I am a parent" box.</div>'; return; }
-      // show all bookings (parents can see only their bookings or all? we'll show their own and a CSV export button)
-      const my = bookings.filter(b=>b.parent===user.name || b.by===user.name);
-      const header = document.createElement('div'); header.innerHTML = `<div style="font-weight:700">Bookings for ${escapeHtml(user.name)}</div>`;
-      el.appendChild(header);
-      if(my.length===0){ const p=document.createElement('div'); p.className='muted'; p.innerText='No bookings yet'; el.appendChild(p); }
-      else {
-        my.forEach(b=>{
-          const d = document.createElement('div'); d.className='booking-item';
-          d.innerHTML = `<div style="font-weight:700">${escapeHtml(b.child)} — <span class="muted small">${escapeHtml(b.date)} ${escapeHtml(b.time)}</span></div>
-                         <div class="muted">Parent: ${escapeHtml(b.parent)}</div>
-                         <div style="margin-top:6px;font-size:0.9rem">${escapeHtml(b.notes||'')}</div>`;
-          el.appendChild(d);
-        });
-        const btn = document.createElement('button'); btn.className='btn';
-        btn.innerText = 'Export my bookings (CSV)';
-        btn.onclick = ()=>{ downloadCSV(my); };
-        el.appendChild(btn);
-      }
-    }
-
-    // helper to download CSV
-    function downloadCSV(list){
-      const rows = [['parent','child','date','time','notes','created']];
-      list.forEach(b => rows.push([b.parent,b.child,b.date,b.time,b.notes,b.created]));
-      const csv = rows.map(r => r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\\n');
-      const blob = new Blob([csv], {type:'text/csv'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download = 'bookings.csv'; a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // small helper escape
-    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, (m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));}
-
-    // initialize UI
-    (function init(){
-      document.getElementById('bf_parent').value = user && user.name ? user.name : '';
-      renderAccount(); renderBookingList(); renderCalendar(); renderPunch(); updateTotals();
-      navTo('home');
-    })();
-
-    // make some functions global for onClick inline handlers
-    window.navTo = navTo;
-    window.showSignup = showSignup;
-    window.showLogin = showLogin;
-    window.signup = signup;
-    window.login = login;
-    window.logout = logout;
-    window.submitBooking = submitBooking;
-  </script>
 </body>
 </html>
-<!-- BOOKINGS PAGE -->
-<div class="page" id="bookings" style="display:none;">
-  <h2>📒🌈 Upcoming Bookings</h2>
 
-  <div id="bookingList"></div>
 
-  <script>
-    // Load bookings from localStorage
